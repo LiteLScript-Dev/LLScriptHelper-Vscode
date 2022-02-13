@@ -27,7 +27,7 @@ jobs:
     - name: Install vsce
       run: npm install vsce -g --save vsce
     - name: Packget to visx
-      run: vsce package
+      run: vsce package --yarn
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
