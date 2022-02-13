@@ -16,15 +16,20 @@ export class ReminderView {
 
 
             this.panel.webview.html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<script language="javascript" type="text/javascript"> 
-window.location.href='https://lxl.litebds.com/#/zh_CN/Development/';
-</script>
-</html>`;
+                <html lang="en">
+            
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body style="background-color: white;">
+                    
+                </body>
+                <script language="javascript" type="text/javascript">
+                    window.location.href = 'https://lxl.litebds.com/#/zh_CN/Development/';
+                </script>
+            
+            </html>`;
 
             this.panel.onDidDispose(() => {
                 this.panel = undefined;

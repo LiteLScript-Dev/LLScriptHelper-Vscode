@@ -1,37 +1,44 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import * as os from "os";
 export let terminal: vscode.Terminal | undefined;
 
 export function runTerminal() {
     var bdsDir = String(vscode.workspace.getConfiguration().get('LLScriptHelper.bds-LLScriptHelperDir'));
+    var bds = String(vscode.workspace.getConfiguration().get('LLScriptHelper.bds-TaskCmd'));
+    var args:string[] = vscode.workspace.getConfiguration('').get('LLScriptHelper.bds-TaskCmd-Args')!;
     if (bdsDir === 'null' || bdsDir === null) {
         selectedDir();
     }
+    else if(bds === 'null' || bds === null){
+        selectedTask(bdsDir);
+    }
     else {
-        if (terminal === undefined) {
-            const libary = vscode.extensions.getExtension('moxicat.LLScriptHelper');
-            const path = libary?.extensionPath + "/runningCache.bat";
-            var bds = vscode.workspace.getConfiguration().get('LLScriptHelper.bdsRunType', true);
-            fs.writeFile(path, bdsDir + "\\" + bds + "\npause", err => {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                terminal = vscode.window.createTerminal({
-                    name: 'LiteLoaderScript Dev',
-                    shellPath: path,
-                    cwd: bdsDir,
-                    message: "LiteLoaderScript Helper Debug Mode"
-
-                });
-                terminal.sendText("pause");
-                terminal.show();
-                vscode.workspace.getConfiguration().update('LLScriptHelper.isrunning', true);
+        if (terminal === undefined && os.platform() === "win32") {
+            terminal = vscode.window.createTerminal({
+                name: 'LiteLoaderScript Dev',
+                shellPath: bds,
+                shellArgs:args,
+                cwd: bdsDir
             });
+            terminal.show();
+            vscode.workspace.getConfiguration().update('LLScriptHelper.isrunning', true);
+        } 
+        else{
+
+            terminal = vscode.window.createTerminal({
+                name: 'LiteLoaderScript Dev',
+                shellPath: bds,
+                shellArgs:args,
+                cwd: bdsDir
+            });
+            terminal.show();
+            vscode.workspace.getConfiguration().update('LLScriptHelper.isrunning', true);
         }
     }
 }
+
 export function stopTerminal() {
     terminal?.sendText('stop');
     terminal?.dispose();
@@ -82,10 +89,51 @@ function selectedDir() {
                     var uris = uri[0].fsPath;
                     vscode.workspace.getConfiguration('').update('LLScriptHelper.bds-LLScriptHelperDir', uris);
                     vscode.window.showInformationMessage('选择成功：' + uris);
+                    selectedTask(uris);
                 }
             });
         }
     });
+}
+
+function selectedTask(uris:string){
+    //搜索bds(windows)
+    if(os.platform() !== "win32"){
+        var fileList = fs.readdirSync(uris);
+        if(fileList.indexOf("bedrock_server.exe") != -1){
+            vscode.workspace.getConfiguration('').update('LLScriptHelper.bds-TaskCmd',"bedrock_server.exe");
+            vscode.workspace.getConfiguration('').update("LLScriptHelper.bds-TaskCmd-Args",['| pause']);
+            vscode.window.showInformationMessage('启动命令选择成功：' + "bedrock_server.exe");
+        } 
+        else if(fileList.indexOf("bedrock_server_mod.exe") != -1){
+            vscode.workspace.getConfiguration('').update('LLScriptHelper.bds-TaskCmd',"bedrock_server_mod.exe");
+            vscode.workspace.getConfiguration('').update("LLScriptHelper.bds-TaskCmd-Args",['| pause']);
+            vscode.window.showInformationMessage('启动命令选择成功：' + "bedrock_server_mod.exe");
+        }
+        else{
+            vscode.window.showWarningMessage('没有找到BDS主程序','手动输入').then(async function (t) {
+                if(t === "手动输入"){
+                    let task = await vscode.window.showInputBox({placeHolder:'请输入您的启动命令'});
+                    if (task) {
+                        let uri = vscode.Uri.parse(task);
+                        let uriself = uri.fsPath
+                        if(uri.fsPath[0] === '/'){
+                            uriself = uri.fsPath.substring(1)
+                        }
+                        vscode.workspace.getConfiguration('').update('LLScriptHelper.bds-TaskCmd',uriself);
+                        vscode.workspace.getConfiguration('').update("LLScriptHelper.bds-TaskCmd-Args",[]);
+                        await vscode.window.showInformationMessage('启动命令选择成功：' + uriself);
+                    } 
+                }
+            });
+        }
+        
+    } else{
+        vscode.workspace.getConfiguration('').update('LLScriptHelper.bds-TaskCmd','bedrock_server');
+        vscode.workspace.getConfiguration('').update("LLScriptHelper.bds-TaskCmd-Args",[]);
+        vscode.window.showWarningMessage('无法推导BDS启动命令,请打开settings.json手动设置','我知道了');
+        ///openLocalFile(+"\\.vscode\\settings.json");
+    }
 }
 
 export function reSetTerminal() {
