@@ -130,6 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposable4 = vscode.commands.registerCommand('LLScriptHelper.runner', () => {
+		//console.log("run");
 		runTerminal();
 	});
 	let disposable2 = vscode.commands.registerCommand('LLScriptHelper.stop', () => {

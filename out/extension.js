@@ -114,6 +114,7 @@ function activate(context) {
         debugger_1.reloadPlugins(fileUri);
     });
     let disposable4 = vscode.commands.registerCommand('LLScriptHelper.runner', () => {
+        //console.log("run");
         debugger_1.runTerminal();
     });
     let disposable2 = vscode.commands.registerCommand('LLScriptHelper.stop', () => {

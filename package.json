@@ -3,7 +3,7 @@
   "displayName": "LLScriptHelper",
   "publisher": "moxicat",
   "description": "Assist in the development of LLScript's plugin",
-  "version": "1.0.2",
+  "version": "1.0.1",
   "icon": "images/icon.png",
   "repository": "https://github.com/LiteLScript-Dev/LLScriptHelper-Vscode",
   "engines": {
